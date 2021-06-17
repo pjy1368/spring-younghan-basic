@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.inject.Provider;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Scope;
 
@@ -31,19 +33,20 @@ public class SingletonWithPrototypeTest1 {
         assertThat(clientBean1.logic()).isEqualTo(1);
 
         final ClientBean clientBean2 = ac.getBean(ClientBean.class);
-        assertThat(clientBean2.logic()).isEqualTo(2);
+        assertThat(clientBean2.logic()).isEqualTo(1);
     }
 
     @Scope("singleton")
     static class ClientBean {
 
-        private final PrototypeBean prototypeBean;
+        private final Provider<PrototypeBean> provider;
 
-        public ClientBean(PrototypeBean prototypeBean) {
-            this.prototypeBean = prototypeBean;
+        public ClientBean(Provider<PrototypeBean> provider) {
+            this.provider = provider;
         }
 
         public int logic() {
+            final PrototypeBean prototypeBean = provider.get();
             prototypeBean.addCount();
             return prototypeBean.count;
         }
